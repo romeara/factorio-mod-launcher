@@ -1,0 +1,23 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+//Default all projects to a synchronized IDE version number. Certain projects, such as the API project, will override this value
+group = 'com.rsomeara'
+
+sourceCompatibility = "${javaVersion}"
+
+//Always download sources, to allow debugging, and use Eclipse containers for greater portability
+eclipse {
+    classpath {
+        downloadSources=true
+        containers = [ "org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-${javaVersion}" ]
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "${gradleVersion}"
+}
