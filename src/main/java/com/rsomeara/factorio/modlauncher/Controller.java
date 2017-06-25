@@ -1,10 +1,12 @@
 package com.rsomeara.factorio.modlauncher;
 
+import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
 public class Controller {
 
-	public Button goButton;
-	
+	@FXML
+	private Button goButton;
+
 }
 
