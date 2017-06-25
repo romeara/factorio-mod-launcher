@@ -25,19 +25,32 @@ public class Controller {
 	
 	//on event methods
 	
+	
+    /**
+     * this button will close the launcher and start Factorio
+     */
+	@FXML
 	public void launchButtonClick(){
-		//this button will close the launcher and start factorio
+
 		System.out.println("you clicked launch");
 	}
 	
+	
+	/**
+	 * this button will clone the current pack and create a new one with a user entered name
+	 */
+	@FXML
 	public void newButtonClick(){
-		//this button will clone the current pack and create a new one with a user entered name
 		System.out.println("you clicked new");
 	}
 	
+	
+	/**
+	 *this will change which mod pack is selected,
+	 *will update the values in modsList and nameField
+	 */
+	@FXML
 	public void modPackTreeClick(){
-		//this will change which mod pack is selected
-		//will update the values in modsList and nameField
 		System.out.println("you clicked on the tree");
 	}
 
