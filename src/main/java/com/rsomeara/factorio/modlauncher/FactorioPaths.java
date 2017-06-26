@@ -23,10 +23,10 @@ public final class FactorioPaths {
         if (SystemUtils.IS_OS_WINDOWS) {
             factorioPath = Paths.get(System.getProperty("user.home")).resolve("AppData").resolve("Roaming")
                     .resolve("Factorio");
-        } else if (SystemUtils.IS_OS_WINDOWS) {
+        } else if (SystemUtils.IS_OS_MAC) {
             factorioPath = Paths.get(System.getProperty("user.home")).resolve("Library").resolve("Application Support")
                     .resolve("factorio");
-        } else if (SystemUtils.IS_OS_WINDOWS) {
+        } else if (SystemUtils.IS_OS_LINUX) {
             factorioPath = Paths.get(System.getProperty("user.home")).resolve(".factorio");
         } else {
             throw new UnsupportedOperationException(
