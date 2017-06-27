@@ -1,12 +1,9 @@
 package com.rsomeara.factorio.modlauncher;
 
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
-import java.util.Properties;
 
 import com.rsomeara.factorio.modlauncher.pack.ModLauncherPaths;
+import com.rsomeara.factorio.modlauncher.pack.ModPackService;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -37,7 +34,9 @@ public class FactorioModLauncher extends Application {
     public void start(Stage stage) throws Exception {
         // Initialize, if needed
         if (!Files.exists(ModLauncherPaths.getModPacksDirectory())) {
-            performFirstTimeSetup();
+            // Create initial mod-pack from current
+            String packName = System.getProperty("user.name") + "'s Modpack";
+            ModPackService.create(packName);
         }
 
         Parent root = FXMLLoader.load(getClass().getResource("/launcherUI.fxml"));
@@ -47,31 +46,6 @@ public class FactorioModLauncher extends Application {
         stage.setTitle("Factorio Mod Launcher");
         stage.setScene(scene);
         stage.show();
-    }
-
-    private void performFirstTimeSetup() {
-        try {
-            // Create initial mod-pack from current
-            String packName = System.getProperty("user.name") + "'s Modpack";
-            String encodedName = Base64.getEncoder().encodeToString(packName.getBytes());
-
-            // Create the modpack directory
-            Files.createDirectories(ModLauncherPaths.getModPacksDirectory());
-
-            // Save the current mod-list.json as the mod pack
-            Path modPackPath = ModLauncherPaths.getModPacksDirectory().resolve(encodedName + ".json");
-            Files.copy(FactorioPaths.getModList(), modPackPath);
-
-            // TODO romeara move properties logic to general location
-            // Save the current modpack as the active modpack
-            Files.createFile(ModLauncherPaths.getPropertiesFile());
-            Properties props = new Properties();
-            props.put("current.modpack", encodedName);
-
-            props.store(Files.newOutputStream(ModLauncherPaths.getPropertiesFile()), null);
-        } catch (IOException e) {
-            throw new RuntimeException("Error performing first-time setup", e);
-        }
     }
 
 }
