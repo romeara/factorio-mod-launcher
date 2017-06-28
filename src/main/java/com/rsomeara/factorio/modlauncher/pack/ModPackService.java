@@ -15,9 +15,10 @@ import com.rsomeara.factorio.modlauncher.FactorioPaths;
  * @author romeara
  * @since 0.1.0
  */
-public final class ModPackService {
+public final class ModPackService implements IModPackService {
 
-    public static void create(String name) throws IOException {
+    @Override
+    public void create(String name) throws IOException {
         Objects.requireNonNull(name);
 
         // Create initial mod-pack from current

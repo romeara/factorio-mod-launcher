@@ -3,7 +3,6 @@ package com.rsomeara.factorio.modlauncher;
 import java.nio.file.Files;
 
 import com.rsomeara.factorio.modlauncher.pack.ModLauncherPaths;
-import com.rsomeara.factorio.modlauncher.pack.ModPackService;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -36,7 +35,7 @@ public class FactorioModLauncher extends Application {
         if (!Files.exists(ModLauncherPaths.getModPacksDirectory())) {
             // Create initial mod-pack from current
             String packName = System.getProperty("user.name") + "'s Modpack";
-            ModPackService.create(packName);
+            Services.getModPackService().create(packName);
         }
 
         Parent root = FXMLLoader.load(getClass().getResource("/launcherUI.fxml"));
