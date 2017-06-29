@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import com.rsomeara.factorio.modlauncher.mod.Mod;
-import com.rsomeara.factorio.modlauncher.mod.ModList;
-import com.rsomeara.factorio.modlauncher.pack.ModLauncherPaths;
+import com.rsomeara.factorio.modlauncher.model.Mod;
+import com.rsomeara.factorio.modlauncher.model.ModList;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -44,14 +43,14 @@ public class Controller {
         try {
             // Mod pack name
             Properties props = new Properties();
-            props.load(Files.newBufferedReader(ModLauncherPaths.getPropertiesFile()));
+            props.load(Files.newBufferedReader(Services.getFilePathService().getPropertiesFile()));
             String currentEncoded = props.getProperty("current.modpack");
             String currentModPackName = new String(Base64.getDecoder().decode(currentEncoded));
 
             nameField.setText(currentModPackName);
 
             // Current mod list
-            ModList list = ModList.fromFile(FactorioPaths.getModList());
+            ModList list = ModList.fromFile(Services.getFilePathService().getFactorioModList());
             List<String> enabledMods = list.getMods().stream()
                     .filter(Mod::isEnabled)
                     .map(Mod::getName)
@@ -60,7 +59,7 @@ public class Controller {
             modsList.setItems(FXCollections.observableArrayList(enabledMods));
 
             // Mod pack list
-            List<TreeItem<String>> modPackNames = Files.list(ModLauncherPaths.getModPacksDirectory())
+            List<TreeItem<String>> modPackNames = Files.list(Services.getFilePathService().getModPacksDirectory())
                     .map(Path::getFileName)
                     .map(Object::toString)
                     .filter(input -> input.endsWith(".json"))

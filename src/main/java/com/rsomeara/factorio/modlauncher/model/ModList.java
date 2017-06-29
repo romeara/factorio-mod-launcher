@@ -1,4 +1,4 @@
-package com.rsomeara.factorio.modlauncher.mod;
+package com.rsomeara.factorio.modlauncher.model;
 
 import java.io.IOException;
 import java.nio.file.Path;

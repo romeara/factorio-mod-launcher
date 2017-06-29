@@ -1,4 +1,4 @@
-package com.rsomeara.factorio.modlauncher.pack;
+package com.rsomeara.factorio.modlauncher.service;
 
 import java.io.IOException;
 

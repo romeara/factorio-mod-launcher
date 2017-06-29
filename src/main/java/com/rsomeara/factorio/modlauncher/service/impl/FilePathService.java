@@ -1,4 +1,4 @@
-package com.rsomeara.factorio.modlauncher;
+package com.rsomeara.factorio.modlauncher.service.impl;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -6,17 +6,31 @@ import java.nio.file.Paths;
 
 import org.apache.commons.lang3.SystemUtils;
 
-public final class FactorioPaths {
+import com.rsomeara.factorio.modlauncher.service.IFilePathService;
 
-    public static Path getModsDirectory() {
+public class FilePathService implements IFilePathService {
+
+    @Override
+    public Path getFactorioModsDirectory() {
         return getFactorioDirectory().resolve("mods");
     }
 
-    public static Path getModList() {
-        return getModsDirectory().resolve("mod-list.json");
+    @Override
+    public Path getFactorioModList() {
+        return getFactorioModsDirectory().resolve("mod-list.json");
     }
 
-    private static Path getFactorioDirectory() {
+    @Override
+    public Path getModPacksDirectory() {
+        return getFactorioModsDirectory().resolve(".modPacks");
+    }
+
+    @Override
+    public Path getPropertiesFile() {
+        return getModPacksDirectory().resolve("launcher.properties");
+    }
+
+    private Path getFactorioDirectory() {
         Path factorioPath = null;
 
         // Paths based on https://wiki.factorio.com/Application_directory
@@ -40,5 +54,6 @@ public final class FactorioPaths {
 
         return factorioPath;
     }
+
 
 }
