@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 import com.rsomeara.factorio.modlauncher.model.Mod;
 import com.rsomeara.factorio.modlauncher.model.ModList;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -38,6 +40,9 @@ public class Controller {
 
     @FXML
     private void initialize() {
+        //watch for focus on the nameField
+        nameField.focusedProperty().addListener(this::textBoxFocusLost);
+        
         // Load the current mod pack name, available packs, and mod list
 
         try {
@@ -103,6 +108,23 @@ public class Controller {
     @FXML
     public void modPackTreeClick() {
         System.out.println("you clicked on the tree");
+    }
+    
+    /**
+     * this will trigger the name change when the enter key is hit
+     */  
+    @FXML
+    public void onEnter(ActionEvent ae){
+        System.out.println("you pressed enter");
+    }
+    
+    /**
+     * this will trigger the name change when the name box it loses focus
+     */
+    private void textBoxFocusLost(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue){
+        if (!newPropertyValue){
+            System.out.println("you removed focus from the name box");
+        }
     }
 
 }
