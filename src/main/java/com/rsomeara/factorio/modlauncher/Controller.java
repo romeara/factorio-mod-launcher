@@ -1,15 +1,9 @@
 package com.rsomeara.factorio.modlauncher;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
 import java.util.List;
-import java.util.Properties;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
-import com.rsomeara.factorio.modlauncher.model.Mod;
-import com.rsomeara.factorio.modlauncher.model.ModList;
 
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -42,45 +36,12 @@ public class Controller {
     private void initialize() {
         //watch for focus on the nameField
         nameField.focusedProperty().addListener(this::textBoxFocusLost);
-        
+
         // Load the current mod pack name, available packs, and mod list
-
         try {
-            // Mod pack name
-            Properties props = new Properties();
-            props.load(Files.newBufferedReader(Services.getFilePathService().getPropertiesFile()));
-            String currentEncoded = props.getProperty("current.modpack");
-            String currentModPackName = new String(Base64.getDecoder().decode(currentEncoded));
+            updateCurrentModPackFields();
 
-            nameField.setText(currentModPackName);
-
-            // Current mod list
-            ModList list = ModList.fromFile(Services.getFilePathService().getFactorioModList());
-            List<String> enabledMods = list.getMods().stream()
-                    .filter(Mod::isEnabled)
-                    .map(Mod::getName)
-                    .collect(Collectors.toList());
-
-            modsList.setItems(FXCollections.observableArrayList(enabledMods));
-
-            // Mod pack list
-            List<TreeItem<String>> modPackNames = Files.list(Services.getFilePathService().getModPacksDirectory())
-                    .map(Path::getFileName)
-                    .map(Object::toString)
-                    .filter(input -> input.endsWith(".json"))
-                    .map(input -> input.substring(0, input.length() - 5))
-                    .map(input -> Base64.getDecoder().decode(input))
-                    .map(String::new)
-                    .map(input -> new TreeItem<>(input))
-                    .collect(Collectors.toList());
-
-            TreeItem<String> root = new TreeItem<>("ModPacks");
-            root.setExpanded(true);
-
-            modPackNames.stream()
-            .forEach(input -> root.getChildren().add(input));
-
-            modPackTree.setRoot(root);
+            updateModPackListFields();
         } catch (IOException e) {
             throw new RuntimeException("Error loading data", e);
         }
@@ -99,7 +60,15 @@ public class Controller {
      */
     @FXML
     public void newButtonClick() {
-        System.out.println("you clicked new");
+        String newName = nameField.getText();
+
+        try {
+            String name = Services.getModPackService().create(newName);
+
+            Services.getModPackService().setActive(name);
+        } catch (IOException e) {
+            throw new RuntimeException("Error creating modpack", e);
+        }
     }
 
     /**
@@ -107,23 +76,84 @@ public class Controller {
      */
     @FXML
     public void modPackTreeClick() {
-        System.out.println("you clicked on the tree");
+        String selectedName = modPackTree.getSelectionModel().getSelectedItem().getValue();
+
+        try {
+            Services.getModPackService().setActive(selectedName);
+        } catch (IOException e) {
+            throw new RuntimeException("Error switching modpack", e);
+        }
     }
-    
+
     /**
      * this will trigger the name change when the enter key is hit
-     */  
+     */
     @FXML
     public void onEnter(ActionEvent ae){
-        System.out.println("you pressed enter");
+        String newName = nameField.getText();
+
+        try {
+            updateCurrentModPackName(newName);
+            updateCurrentModPackFields();
+        } catch (IOException e) {
+            throw new RuntimeException("Error updating modpack name", e);
+        }
     }
-    
+
+    private void updateCurrentModPackFields() throws IOException {
+        // Mod pack name
+        String currentModPackName = Services.getModPackService().getActive();
+
+        // Current mod list
+        List<String> enabledMods = Services.getFactorioService().getEnabledMods();
+
+        nameField.setText(currentModPackName);
+        modsList.setItems(FXCollections.observableArrayList(enabledMods));
+    }
+
+    private void updateModPackListFields() throws IOException {
+        // Mod pack list
+        List<TreeItem<String>> modPackNames = Services.getModPackService().getAll().stream()
+                .map(input -> new TreeItem<>(input))
+                .collect(Collectors.toList());
+
+        TreeItem<String> root = new TreeItem<>("ModPacks");
+        root.setExpanded(true);
+
+        modPackNames.stream()
+        .forEach(input -> root.getChildren().add(input));
+
+        modPackTree.setRoot(root);
+    }
+
+    private void updateCurrentModPackName(String newName) throws IOException {
+        // Get current name
+        String currentModPackName = Services.getModPackService().getActive();
+
+        if (!Objects.equals(currentModPackName, newName)) {
+            // Create and switch to new modpack with name
+            String name = Services.getModPackService().create(newName);
+            Services.getModPackService().setActive(name);
+
+            // Delete old mod pack
+            Services.getModPackService().delete(currentModPackName);
+        }
+    }
+
     /**
      * this will trigger the name change when the name box it loses focus
      */
     private void textBoxFocusLost(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue){
         if (!newPropertyValue){
-            System.out.println("you removed focus from the name box");
+            String newName = nameField.getText();
+
+            try {
+                updateCurrentModPackName(newName);
+                updateCurrentModPackFields();
+                updateModPackListFields();
+            } catch (IOException e) {
+                throw new RuntimeException("Error updating modpack name", e);
+            }
         }
     }
 
