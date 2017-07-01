@@ -23,6 +23,13 @@ dependencies{
 	compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
     compile group: 'com.google.guava', name: 'guava', version: '22.0'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+    
+    testCompile group: 'org.testng', name: 'testng', version: '6.11'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.8.47'
+}
+
+test{
+    useTestNG()
 }
 
 task wrapper(type: Wrapper) {

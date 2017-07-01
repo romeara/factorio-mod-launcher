@@ -6,8 +6,16 @@ import java.nio.file.Paths;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import com.rsomeara.factorio.modlauncher.Services;
 import com.rsomeara.factorio.modlauncher.service.IFilePathService;
 
+/**
+ * Implementation of {@link IFilePathService}. Clients should not reference this class directly - get an instance of
+ * IFilePathService via {@link Services#getFilePathService} instead
+ *
+ * @author romeara
+ * @since 0.1.0
+ */
 public class FilePathService implements IFilePathService {
 
     @Override
@@ -30,6 +38,9 @@ public class FilePathService implements IFilePathService {
         return getModPacksDirectory().resolve("launcher.properties");
     }
 
+    /**
+     * @return The expected installation location of Factorio, based on the OS being run on
+     */
     private Path getFactorioDirectory() {
         Path factorioPath = null;
 
