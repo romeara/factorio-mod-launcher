@@ -17,6 +17,8 @@ public interface IModPackService {
 
     void delete(String name) throws IOException;
 
+    List<String> getCurrentSavedModList() throws IOException;
+
     String getActive() throws IOException;
 
     void setActive(String name) throws IOException;

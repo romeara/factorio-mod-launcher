@@ -3,6 +3,7 @@ package com.rsomeara.factorio.modlauncher;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javafx.beans.value.ObservableValue;
@@ -45,8 +46,17 @@ public class Controller {
         nameField.focusedProperty().addListener(this::textBoxFocusLost);
         modPackTree.setShowRoot(false);
 
-        // Load the current mod pack name, available packs, and mod list
         try {
+            // Check that the current mod pack is unaltered
+            List<String> savedModList = Services.getModPackService().getCurrentSavedModList();
+            List<String> activeModList = Services.getFactorioService().getEnabledMods();
+
+            if (savedModList.size() != activeModList.size() || !savedModList.containsAll(activeModList)) {
+                // TODO jholmes7086 Open a dialog box linked into event calls (update current, create new from, discard
+                // changes)
+            }
+
+            // Load the current mod pack name, available packs, and mod list
             updateCurrentModPackFields();
 
             updateModPackListFields();
@@ -61,6 +71,7 @@ public class Controller {
     @FXML
     public void launchButtonClick() {
         System.out.println("you clicked launch");
+        clearError();
     }
 
     /**
@@ -69,6 +80,8 @@ public class Controller {
      */
     @FXML
     public void newButtonClick() {
+        clearError();
+
         String newName = nameField.getText() + " (Copy)";
 
         try {
@@ -78,7 +91,8 @@ public class Controller {
 
             updateCurrentModPackFields();
             updateModPackListFields();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            errorOccured("Error creating modpack" + e.getMessage());
             throw new RuntimeException("Error creating modpack", e);
         }
     }
@@ -89,13 +103,16 @@ public class Controller {
      */
     @FXML
     public void modPackTreeClick() {
+        clearError();
+
         String selectedName = modPackTree.getSelectionModel().getSelectedItem().getValue();
 
         try {
             Services.getModPackService().setActive(selectedName);
 
             updateCurrentModPackFields();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            errorOccured("Error switching modpack" + e.getMessage());
             throw new RuntimeException("Error switching modpack", e);
         }
     }
@@ -105,6 +122,8 @@ public class Controller {
      */
     @FXML
     public void onEnter(ActionEvent ae) {
+        clearError();
+
         String newName = nameField.getText();
 
         try {
@@ -112,9 +131,55 @@ public class Controller {
 
             updateCurrentModPackFields();
             updateModPackListFields();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            errorOccured("Error updating modpack name" + e.getMessage());
             throw new RuntimeException("Error updating modpack name", e);
         }
+    }
+
+    /**
+     * will delete the selected mod pack when clicked
+     */
+    public void deleteButtonClicked() {
+        clearError();
+
+        try {
+            String currentModPackName = Services.getModPackService().getActive();
+
+            // Find next on list
+            Optional<String> next = Services.getModPackService().getAll().stream()
+                    .filter(input -> !Objects.equals(input, currentModPackName))
+                    .findFirst();
+
+            if (!next.isPresent()) {
+                errorOccured("Cannot delete last mod pack");
+            } else {
+                // Update current pack
+                Services.getModPackService().setActive(next.get());
+                updateCurrentModPackFields();
+
+                // Remove target pack
+                Services.getModPackService().delete(currentModPackName);
+                updateModPackListFields();
+            }
+        } catch (Exception e) {
+            errorOccured("Error deleting modpack " + e.getMessage());
+            throw new RuntimeException("Error deleting modpack", e);
+        }
+
+    }
+
+    /**
+     * this will show any errors that come up. otherwise there won't be text so
+     * it won't show anything
+     */
+    public void errorOccured(String errorMsg) {
+        // write to field errorLabel
+        errorLabel.setText(errorMsg);
+    }
+
+    public void clearError() {
+        errorLabel.setText("");
     }
 
     private void updateCurrentModPackFields() throws IOException {
@@ -183,21 +248,6 @@ public class Controller {
                 throw new RuntimeException("Error updating modpack name", e);
             }
         }
-    }
-
-    /**
-     * will delete the selected mod pack when clicked
-     */
-    public void deleteButtonClicked() {
-        System.out.println("you clicked delete");
-    }
-
-    /**
-     * this will show any errors that come up. otherwise there won't be text so
-     * it won't show anything
-     */
-    public void errorOccured(String errorMsg) {
-        // write to field errorLabel
     }
 
 }
