@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -33,8 +34,14 @@ public class Controller {
     private ListView<String> modsList;
 
     @FXML
+    private Button deleteButton;
+
+    @FXML
+    private Label errorLabel;
+
+    @FXML
     private void initialize() {
-        //watch for focus on the nameField
+        // watch for focus on the nameField
         nameField.focusedProperty().addListener(this::textBoxFocusLost);
         modPackTree.setShowRoot(false);
 
@@ -57,7 +64,8 @@ public class Controller {
     }
 
     /**
-     * this button will clone the current pack and create a new one with a user entered name
+     * this button will clone the current pack and create a new one with a user
+     * entered name
      */
     @FXML
     public void newButtonClick() {
@@ -76,7 +84,8 @@ public class Controller {
     }
 
     /**
-     * this will change which mod pack is selected, will update the values in modsList and nameField
+     * this will change which mod pack is selected, will update the values in
+     * modsList and nameField
      */
     @FXML
     public void modPackTreeClick() {
@@ -95,7 +104,7 @@ public class Controller {
      * this will trigger the name change when the enter key is hit
      */
     @FXML
-    public void onEnter(ActionEvent ae){
+    public void onEnter(ActionEvent ae) {
         String newName = nameField.getText();
 
         try {
@@ -128,8 +137,7 @@ public class Controller {
     private void updateModPackListFields() throws IOException {
         // Mod pack list
         List<TreeItem<String>> modPackNames = Services.getModPackService().getAll().stream()
-                .map(input -> new TreeItem<>(input))
-                .collect(Collectors.toList());
+                .map(input -> new TreeItem<>(input)).collect(Collectors.toList());
 
         if (modPackTree.getRoot() == null) {
             TreeItem<String> root = new TreeItem<>("ModPacks");
@@ -140,8 +148,7 @@ public class Controller {
 
         modPackTree.getRoot().getChildren().clear();
 
-        modPackNames.stream()
-        .forEach(input -> modPackTree.getRoot().getChildren().add(input));
+        modPackNames.stream().forEach(input -> modPackTree.getRoot().getChildren().add(input));
 
     }
 
@@ -162,8 +169,9 @@ public class Controller {
     /**
      * this will trigger the name change when the name box it loses focus
      */
-    private void textBoxFocusLost(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue){
-        if (!newPropertyValue){
+    private void textBoxFocusLost(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue,
+            Boolean newPropertyValue) {
+        if (!newPropertyValue) {
             String newName = nameField.getText();
 
             try {
@@ -175,6 +183,21 @@ public class Controller {
                 throw new RuntimeException("Error updating modpack name", e);
             }
         }
+    }
+
+    /**
+     * will delete the selected mod pack when clicked
+     */
+    public void deleteButtonClicked() {
+        System.out.println("you clicked delete");
+    }
+
+    /**
+     * this will show any errors that come up. otherwise there won't be text so
+     * it won't show anything
+     */
+    public void errorOccured(String errorMsg) {
+        // write to field errorLabel
     }
 
 }
