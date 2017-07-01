@@ -36,6 +36,7 @@ public class Controller {
     private void initialize() {
         //watch for focus on the nameField
         nameField.focusedProperty().addListener(this::textBoxFocusLost);
+        modPackTree.setShowRoot(false);
 
         // Load the current mod pack name, available packs, and mod list
         try {
@@ -60,12 +61,15 @@ public class Controller {
      */
     @FXML
     public void newButtonClick() {
-        String newName = nameField.getText();
+        String newName = nameField.getText() + " (Copy)";
 
         try {
             String name = Services.getModPackService().create(newName);
 
             Services.getModPackService().setActive(name);
+
+            updateCurrentModPackFields();
+            updateModPackListFields();
         } catch (IOException e) {
             throw new RuntimeException("Error creating modpack", e);
         }
@@ -80,6 +84,8 @@ public class Controller {
 
         try {
             Services.getModPackService().setActive(selectedName);
+
+            updateCurrentModPackFields();
         } catch (IOException e) {
             throw new RuntimeException("Error switching modpack", e);
         }
@@ -94,7 +100,9 @@ public class Controller {
 
         try {
             updateCurrentModPackName(newName);
+
             updateCurrentModPackFields();
+            updateModPackListFields();
         } catch (IOException e) {
             throw new RuntimeException("Error updating modpack name", e);
         }
@@ -108,7 +116,13 @@ public class Controller {
         List<String> enabledMods = Services.getFactorioService().getEnabledMods();
 
         nameField.setText(currentModPackName);
-        modsList.setItems(FXCollections.observableArrayList(enabledMods));
+
+        if (modsList.getItems() == null) {
+            modsList.setItems(FXCollections.observableArrayList());
+        }
+
+        modsList.getItems().clear();
+        modsList.getItems().addAll(enabledMods);
     }
 
     private void updateModPackListFields() throws IOException {
@@ -117,13 +131,18 @@ public class Controller {
                 .map(input -> new TreeItem<>(input))
                 .collect(Collectors.toList());
 
-        TreeItem<String> root = new TreeItem<>("ModPacks");
-        root.setExpanded(true);
+        if (modPackTree.getRoot() == null) {
+            TreeItem<String> root = new TreeItem<>("ModPacks");
+            root.setExpanded(true);
+
+            modPackTree.setRoot(root);
+        }
+
+        modPackTree.getRoot().getChildren().clear();
 
         modPackNames.stream()
-        .forEach(input -> root.getChildren().add(input));
+        .forEach(input -> modPackTree.getRoot().getChildren().add(input));
 
-        modPackTree.setRoot(root);
     }
 
     private void updateCurrentModPackName(String newName) throws IOException {
@@ -149,6 +168,7 @@ public class Controller {
 
             try {
                 updateCurrentModPackName(newName);
+
                 updateCurrentModPackFields();
                 updateModPackListFields();
             } catch (IOException e) {
