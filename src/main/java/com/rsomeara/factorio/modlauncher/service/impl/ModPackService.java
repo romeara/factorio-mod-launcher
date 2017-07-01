@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
 import com.rsomeara.factorio.modlauncher.Services;
+import com.rsomeara.factorio.modlauncher.model.Mod;
+import com.rsomeara.factorio.modlauncher.model.ModList;
 import com.rsomeara.factorio.modlauncher.service.IFilePathService;
 import com.rsomeara.factorio.modlauncher.service.IModPackService;
 
@@ -69,20 +71,10 @@ public final class ModPackService implements IModPackService {
     }
 
     @Override
-    public String getActive() throws IOException {
-        Properties props = new Properties();
-        props.load(Files.newBufferedReader(Services.getFilePathService().getPropertiesFile()));
-
-        String currentEncoded = props.getProperty("current.modpack");
-
-        return new String(Base64.getDecoder().decode(currentEncoded));
-    }
-
-    @Override
     public void delete(String name) throws IOException {
         Objects.requireNonNull(name);
 
-        Preconditions.checkArgument(!Objects.equals(name, getActive()), "Cannot delete enabled mod pack");
+        Preconditions.checkArgument(getAll().size() > 1, "Cannot delete last enabled mod pack");
 
         String encodedName = Base64.getEncoder().encodeToString(name.getBytes());
 
@@ -91,6 +83,29 @@ public final class ModPackService implements IModPackService {
         if (Files.exists(modPackPath)) {
             Files.delete(modPackPath);
         }
+    }
+
+    @Override
+    public List<String> getCurrentSavedModList() throws IOException {
+        String encodedName = Base64.getEncoder().encodeToString(getActive().getBytes());
+        Path modPackPath = filePathService.getModPacksDirectory().resolve(encodedName + ".json");
+
+        ModList list = ModList.fromFile(modPackPath);
+
+        return list.getMods().stream()
+                .filter(Mod::isEnabled)
+                .map(Mod::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getActive() throws IOException {
+        Properties props = new Properties();
+        props.load(Files.newBufferedReader(Services.getFilePathService().getPropertiesFile()));
+
+        String currentEncoded = props.getProperty("current.modpack");
+
+        return new String(Base64.getDecoder().decode(currentEncoded));
     }
 
     @Override
@@ -108,4 +123,5 @@ public final class ModPackService implements IModPackService {
 
         props.store(Files.newOutputStream(filePathService.getPropertiesFile()), null);
     }
+
 }
