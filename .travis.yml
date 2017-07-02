@@ -9,6 +9,11 @@ script:
   - ./gradlew assemble
   - ./gradlew check -PremoteBuild
   
+after_success:
+  - curl https://copilot.blackducksoftware.com/scripts/init/gradle -o bds_init.gradle
+  - ./gradlew --init-script bds_init.gradle buildBom -DbdsPluginVersion=5.0.2
+  - bash <(curl -s https://copilot.blackducksoftware.com/bash/travis) ./build/blackduck/*_bdio.jsonld
+  
 notifications:
   email:
     recipients:
