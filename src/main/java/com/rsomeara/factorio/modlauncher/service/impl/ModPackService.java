@@ -3,6 +3,7 @@ package com.rsomeara.factorio.modlauncher.service.impl;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
@@ -122,6 +123,31 @@ public final class ModPackService implements IModPackService {
         props.put("current.modpack", encodedName);
 
         props.store(Files.newOutputStream(filePathService.getPropertiesFile()), null);
+
+        Path modPackPath = filePathService.getModPacksDirectory().resolve(encodedName + ".json");
+        Files.copy(modPackPath, filePathService.getFactorioModList(), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    @Override
+    public void updateActiveMods() throws IOException {
+        String name = getActive();
+
+        String encodedName = Base64.getEncoder().encodeToString(name.getBytes());
+
+        // Save the current mod-list.json as the mod pack
+        Path modPackPath = filePathService.getModPacksDirectory().resolve(encodedName + ".json");
+        Files.copy(filePathService.getFactorioModList(), modPackPath, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    @Override
+    public void restoreActiveMods() throws IOException {
+        String name = getActive();
+
+        String encodedName = Base64.getEncoder().encodeToString(name.getBytes());
+
+        // Restore the current mod list from saved
+        Path modPackPath = filePathService.getModPacksDirectory().resolve(encodedName + ".json");
+        Files.copy(modPackPath, filePathService.getFactorioModList(), StandardCopyOption.REPLACE_EXISTING);
     }
 
 }

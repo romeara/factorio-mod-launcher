@@ -23,4 +23,8 @@ public interface IModPackService {
 
     void setActive(String name) throws IOException;
 
+    void updateActiveMods() throws IOException;
+
+    void restoreActiveMods() throws IOException;
+
 }

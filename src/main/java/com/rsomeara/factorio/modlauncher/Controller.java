@@ -56,32 +56,7 @@ public class Controller {
             List<String> activeModList = Services.getFactorioService().getEnabledMods();
 
             if (savedModList.size() != activeModList.size() || !savedModList.containsAll(activeModList)) {
-                // Open a dialog box linked into event calls
-                // (update current, create new from, discard
-                // changes)
-                Alert alert = new Alert(AlertType.CONFIRMATION);
-                alert.setTitle("Mods pack changed");
-                alert.setHeaderText("The mods in " + Services.getModPackService().getActive()
-                        + " were changed in factorio. Would you like to save the changes?");
-                // alert.setContentText();
-
-                ButtonType buttonTypeSave = new ButtonType("Save", ButtonData.LEFT);
-                ButtonType buttonTypeSaveAs = new ButtonType("Save As...", ButtonData.LEFT);
-                ButtonType buttonTypeCancel = new ButtonType("Discard Changes", ButtonData.CANCEL_CLOSE);
-
-                alert.getButtonTypes().setAll(buttonTypeSave, buttonTypeSaveAs, buttonTypeCancel);
-
-                Optional<ButtonType> result = alert.showAndWait();
-                if (result.get() == buttonTypeSave) {
-                    // ... user chose "save"
-                    System.out.println("save");
-                } else if (result.get() == buttonTypeSaveAs) {
-                    // ... user chose "save as"
-                    System.out.println("save as");
-                } else {
-                    // ... user chose CANCEL or closed the dialog
-                    System.out.println("close");
-                }
+                handleCurrentModsMismatch();
             }
 
             // Load the current mod pack name, available packs, and mod list
@@ -90,7 +65,7 @@ public class Controller {
             updateModPackListFields();
         } catch (
 
-        IOException e) {
+                IOException e) {
             throw new RuntimeException("Error loading data", e);
         }
     }
@@ -112,18 +87,11 @@ public class Controller {
     public void newButtonClick() {
         clearError();
 
-        String newName = nameField.getText() + " (Copy)";
-
         try {
-            String name = Services.getModPackService().create(newName);
-
-            Services.getModPackService().setActive(name);
-
-            updateCurrentModPackFields();
-            updateModPackListFields();
+            createNewModpack(getUnusedName(nameField.getText()));
         } catch (Exception e) {
-            errorOccured("Error creating modpack" + e.getMessage());
-            throw new RuntimeException("Error creating modpack", e);
+            errorOccured("Error naming modpack" + e.getMessage());
+            throw new RuntimeException("Error naming modpack", e);
         }
     }
 
@@ -257,6 +225,60 @@ public class Controller {
 
             // Delete old mod pack
             Services.getModPackService().delete(currentModPackName);
+        }
+    }
+
+    private void handleCurrentModsMismatch() throws IOException {
+        String activeModPack = Services.getModPackService().getActive();
+
+        // Open a dialog box linked into event calls (update current, create new from, discard changes)
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Mods pack changed");
+        alert.setHeaderText(
+                "The mods in " + activeModPack + " were changed in factorio. Would you like to save the changes?");
+
+        ButtonType buttonTypeSave = new ButtonType("Save", ButtonData.LEFT);
+        ButtonType buttonTypeSaveAs = new ButtonType("Save As...", ButtonData.LEFT);
+        ButtonType buttonTypeCancel = new ButtonType("Discard Changes", ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonTypeSave, buttonTypeSaveAs, buttonTypeCancel);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeSave) {
+            // ... user chose "save"
+            Services.getModPackService().updateActiveMods();
+        } else if (result.get() == buttonTypeSaveAs) {
+            // ... user chose "save as"
+            createNewModpack(getUnusedName(activeModPack));
+        } else {
+            // ... user chose CANCEL or closed the dialog
+            Services.getModPackService().restoreActiveMods();
+        }
+    }
+
+    private String getUnusedName(String initialName) throws IOException {
+        List<String> usedNames = Services.getModPackService().getAll();
+
+        String name = initialName;
+
+        while (usedNames.contains(name)) {
+            name = name + " (Copy)";
+        }
+
+        return name;
+    }
+
+    private void createNewModpack(String newName) {
+        try {
+            String name = Services.getModPackService().create(newName);
+
+            Services.getModPackService().setActive(name);
+
+            updateCurrentModPackFields();
+            updateModPackListFields();
+        } catch (Exception e) {
+            errorOccured("Error creating modpack" + e.getMessage());
+            throw new RuntimeException("Error creating modpack", e);
         }
     }
 
