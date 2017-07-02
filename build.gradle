@@ -1,7 +1,10 @@
+plugins {
+    id 'us.kirchmeier.capsule' version '1.0.2'
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
-//Default all projects to a synchronized IDE version number. Certain projects, such as the API project, will override this value
 group = 'com.rsomeara'
 
 sourceCompatibility = "${javaVersion}"
@@ -30,6 +33,14 @@ dependencies{
 
 test{
     useTestNG()
+}
+
+task distCapsule(type: FatCapsule) {
+    applicationClass 'com.rsomeara.factorio.modlauncher.FactorioModLauncher'
+}
+
+artifacts {
+    archives distCapsule
 }
 
 task wrapper(type: Wrapper) {
