@@ -7,4 +7,6 @@ public interface IFactorioService {
 
     List<String> getEnabledMods() throws IOException;
 
+    void launch() throws IOException;
+
 }

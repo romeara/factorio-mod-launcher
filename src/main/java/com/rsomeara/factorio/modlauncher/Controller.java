@@ -75,8 +75,14 @@ public class Controller {
      */
     @FXML
     public void launchButtonClick() {
-        System.out.println("you clicked launch");
         clearError();
+
+        try {
+            Services.getFactorioService().launch();
+        } catch (Exception e) {
+            errorOccured("Error launching Factorio: " + e.getMessage());
+            throw new RuntimeException("Error launching Factorio", e);
+        }
     }
 
     /**
@@ -90,7 +96,7 @@ public class Controller {
         try {
             createNewModpack(getUnusedName(nameField.getText()));
         } catch (Exception e) {
-            errorOccured("Error naming modpack" + e.getMessage());
+            errorOccured("Error naming modpack: " + e.getMessage());
             throw new RuntimeException("Error naming modpack", e);
         }
     }
@@ -103,15 +109,17 @@ public class Controller {
     public void modPackTreeClick() {
         clearError();
 
-        String selectedName = modPackTree.getSelectionModel().getSelectedItem().getValue();
+        if (modPackTree.getSelectionModel().getSelectedItem() != null) {
+            String selectedName = modPackTree.getSelectionModel().getSelectedItem().getValue();
 
-        try {
-            Services.getModPackService().setActive(selectedName);
+            try {
+                Services.getModPackService().setActive(selectedName);
 
-            updateCurrentModPackFields();
-        } catch (Exception e) {
-            errorOccured("Error switching modpack" + e.getMessage());
-            throw new RuntimeException("Error switching modpack", e);
+                updateCurrentModPackFields();
+            } catch (Exception e) {
+                errorOccured("Error switching modpack: " + e.getMessage());
+                throw new RuntimeException("Error switching modpack", e);
+            }
         }
     }
 
@@ -130,7 +138,7 @@ public class Controller {
             updateCurrentModPackFields();
             updateModPackListFields();
         } catch (Exception e) {
-            errorOccured("Error updating modpack name" + e.getMessage());
+            errorOccured("Error updating modpack name: " + e.getMessage());
             throw new RuntimeException("Error updating modpack name", e);
         }
     }
@@ -160,7 +168,7 @@ public class Controller {
                 updateModPackListFields();
             }
         } catch (Exception e) {
-            errorOccured("Error deleting modpack " + e.getMessage());
+            errorOccured("Error deleting modpack: " + e.getMessage());
             throw new RuntimeException("Error deleting modpack", e);
         }
 
