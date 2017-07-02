@@ -11,7 +11,7 @@ public class FilePathServiceTest {
 
     private final FilePathService filePathService = new FilePathService();
 
-    @Test
+    @Test(groups = "factorioInstalled")
     public void getFactorioModsDirectory() throws Exception {
         Path factorioModsDirectory = filePathService.getFactorioModsDirectory();
 
@@ -21,7 +21,7 @@ public class FilePathServiceTest {
         Assert.assertEquals(factorioModsDirectory.getFileName().toString(), "mods");
     }
 
-    @Test
+    @Test(groups = "factorioInstalled")
     public void getFactorioModsList() throws Exception {
         Path factorioModsDirectory = filePathService.getFactorioModList();
 
@@ -31,7 +31,7 @@ public class FilePathServiceTest {
         Assert.assertEquals(factorioModsDirectory.getFileName().toString(), "mod-list.json");
     }
 
-    @Test
+    @Test(groups = "factorioInstalled")
     public void getModPacksDirectory() throws Exception {
         Path factorioModsDirectory = filePathService.getModPacksDirectory();
 
@@ -41,7 +41,7 @@ public class FilePathServiceTest {
         Assert.assertEquals(factorioModsDirectory.getFileName().toString(), ".modPacks");
     }
 
-    @Test
+    @Test(groups = "factorioInstalled")
     public void getPropertiesFile() throws Exception {
         Path factorioModsDirectory = filePathService.getPropertiesFile();
 

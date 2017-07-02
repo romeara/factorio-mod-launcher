@@ -5,6 +5,10 @@ sudo: required
 jdk:
   - oraclejdk8
   
+script:
+  - ./gradlew assemble
+  - ./gradlew check -PremoteBuild
+  
 notifications:
   email:
     recipients:
