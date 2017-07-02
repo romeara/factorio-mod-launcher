@@ -1,0 +1,11 @@
+language: java
+
+jdk:
+  - oraclejdk8
+  
+notifications:
+  email:
+    recipients:
+      - romeara@live.com
+    on_success: change
+on_failure: always
