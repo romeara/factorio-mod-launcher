@@ -10,7 +10,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -52,15 +56,41 @@ public class Controller {
             List<String> activeModList = Services.getFactorioService().getEnabledMods();
 
             if (savedModList.size() != activeModList.size() || !savedModList.containsAll(activeModList)) {
-                // TODO jholmes7086 Open a dialog box linked into event calls (update current, create new from, discard
+                // Open a dialog box linked into event calls
+                // (update current, create new from, discard
                 // changes)
+                Alert alert = new Alert(AlertType.CONFIRMATION);
+                alert.setTitle("Mods pack changed");
+                alert.setHeaderText("The mods in " + Services.getModPackService().getActive()
+                        + " were changed in factorio. Would you like to save the changes?");
+                // alert.setContentText();
+
+                ButtonType buttonTypeSave = new ButtonType("Save", ButtonData.LEFT);
+                ButtonType buttonTypeSaveAs = new ButtonType("Save As...", ButtonData.LEFT);
+                ButtonType buttonTypeCancel = new ButtonType("Discard Changes", ButtonData.CANCEL_CLOSE);
+
+                alert.getButtonTypes().setAll(buttonTypeSave, buttonTypeSaveAs, buttonTypeCancel);
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.get() == buttonTypeSave) {
+                    // ... user chose "save"
+                    System.out.println("save");
+                } else if (result.get() == buttonTypeSaveAs) {
+                    // ... user chose "save as"
+                    System.out.println("save as");
+                } else {
+                    // ... user chose CANCEL or closed the dialog
+                    System.out.println("close");
+                }
             }
 
             // Load the current mod pack name, available packs, and mod list
             updateCurrentModPackFields();
 
             updateModPackListFields();
-        } catch (IOException e) {
+        } catch (
+
+        IOException e) {
             throw new RuntimeException("Error loading data", e);
         }
     }
@@ -148,8 +178,7 @@ public class Controller {
 
             // Find next on list
             Optional<String> next = Services.getModPackService().getAll().stream()
-                    .filter(input -> !Objects.equals(input, currentModPackName))
-                    .findFirst();
+                    .filter(input -> !Objects.equals(input, currentModPackName)).findFirst();
 
             if (!next.isPresent()) {
                 errorOccured("Cannot delete last mod pack");
